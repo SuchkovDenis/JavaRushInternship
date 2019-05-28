@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <title>Комплектующие</title>
+</head>
+
+<body>
+
+
+<div class="container">
+    <div class="row ">
+        <h1 class="col-auto mr-auto">Комплектующие</h1>
+        <form th:action="@{'/search'}" class="form-inline col-auto mt-2" method="get">
+            <div class="form-group mx-sm-3 mb-2">
+                <input type="text" class="form-control" th:name="name" placeholder="Название" required>
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Поиск</button>
+        </form>
+    </div>
+    <div>
+        <ul id="filter" class="pagination">
+            <li class="page-item" th:classappend="${pagingLinkText.equals('')} ? 'active' : ''">
+                <a href="#" class="page-link" th:href="@{'/'}">Не важно</a>
+            </li>
+            <li class="page-item" th:classappend="${pagingLinkText.contains('true')} ? 'active' : ''">
+                <a href="#" class="page-link" th:href="@{'/?necessary=true'}">Необходимо</a>
+            </li>
+            <li class="page-item" th:classappend="${pagingLinkText.contains('false')} ? 'active' : ''">
+                <a href="#" class="page-link" th:href="@{'/?necessary=false'}">Опционально</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Добавить комплектующую</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{'/add'}" method="post" th:object="${part}">
+                        <div class="form-group">
+                            <label for="name">Имя</label>
+                            <input type="text" class="form-control" id="name"
+                                   th:value="${part.name}" th:field="*{name}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="part-nesessary" class="col-form-label">Необходимость</label>
+                            <div class="form-check form-check-inline" id="part-nesessary">
+                                <input class="form-check-input" type="radio" th:field="*{necessary}" th:value="${true}" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+                                <label class="form-check-label" for="inlineRadio1">Да</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{necessary}" th:value="${false}" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                                <label class="form-check-label" for="inlineRadio2">Нет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="part-amount" class="col-form-label">Количество</label>
+                            <input type="number" min="0" step="1" class="form-control" id="part-amount" th:field="*{amount}" th:default="1" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                            <button type="submit" class="btn btn-primary">Добавить</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr class="d-flex">
+                <th class="col-4" scope="col">Название</th>
+                <th class="col-3" scope="col">Необходимость</th>
+                <th class="col-2" scope="col">Количество</th>
+                <th class="col-3" scope="col">Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="d-flex" th:each="part : ${parts}">
+                <td class="col-4" th:text="${part.name}"></td>
+                <td class="col-3" th:text="${part.necessary? 'Да' : 'Нет'}"></td>
+                <td class="col-2" th:text="${part.amount}"></td>
+                <td class="col-3"><a class="btn btn-outline-warning" th:href="@{'/edit?id='+${part.id}}">Изменить</a>
+                    <a class="btn btn-outline-danger" th:href="@{'/delete?id='+${part.id}}">Удалить</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="float-left">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${i==page+1} ? 'active' : ''" th:each="i : ${#numbers.sequence(1, totalPage, 1)}">
+                <a href="#" class="page-link" th:text="${i}" th:href="@{'/?page='+${i}+${pagingLinkText}}">1</a>
+            </li>
+        </ul>
+    </div>
+
+    <h3 class="float-right">Можно собрать <span th:text="${num}">777</span> компьютеров</h3>
+
+    <button type="button" class="btn btn-block btn-outline-success" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Добавить</button>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+</body>
+</html>
